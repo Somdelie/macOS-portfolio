@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Georama } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/common/navbar";
+import 'react-tooltip/dist/react-tooltip.css'
 
 const _georama = Georama({
   subsets: ["latin"],
