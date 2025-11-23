@@ -13,9 +13,12 @@ const WindowWrapper = <P extends object>(
 ) => {
   const Wrapped: React.FC<P> = (props) => {
     const { focusWindow, windows } = useWindowStore();
-    const { zIndex, isOpen, isMaximized } = windows[windowKey];
-    const ref = useRef<HTMLDivElement>(null);
-  const draggableRef = useRef<{ kill?: () => void } | null>(null);
+    const { zIndex, isOpen, isMaximized } = windows[windowKey] || { 
+      zIndex: 0, 
+      isOpen: false, 
+      isMaximized: false 
+    };
+    const ref = useRef<HTMLDivElement>(null);  const draggableRef = useRef<{ kill?: () => void } | null>(null);
 
     useGSAP(() => {
       const el = ref.current;

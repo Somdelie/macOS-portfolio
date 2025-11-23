@@ -80,7 +80,6 @@ const Dock = () => {
       openWindow(app.id, null);
     }
 
-    console.log(windows, "These are windows in dock");
   };
 
   return (
