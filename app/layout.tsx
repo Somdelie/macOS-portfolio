@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Georama } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/common/navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const _georama = Georama({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: "--font-georama",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+})
 
 export const metadata: Metadata = {
   title: "Cautious | Full Stack Developer & UI/UX Enthusiast",
@@ -67,9 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased 
-        
-        `}
+       className={`${_georama.variable} font-sans antialiased`}
       >
         <div className="flex flex-col">
           <Navbar />
