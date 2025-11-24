@@ -89,7 +89,6 @@ const SpotifyLikedList = () => {
           {likedTracks.map((t) => (
             <li key={t.id} className="flex items-center gap-3 p-2 hover:bg-gray-50">
               {t.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img src={t.image} alt="" className="w-10 h-10 rounded object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded bg-gray-200" />)
@@ -245,7 +244,7 @@ const Music = () => {
     accessToken,
     user,
     playlists,
-    likedTracks,
+    // likedTracks,
     isLoading: sLoading,
     error: sError,
     login: spotifyLogin,

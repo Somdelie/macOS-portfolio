@@ -17,7 +17,8 @@ const useLocationStore = create<LocationState>()(
 
     setActiveLocation: (location) =>
       set((state) => {
-        state.activeLocation = location ?? DEFAULT_LOCATION;
+        // Coerce incoming value to the expected location shape to satisfy TS
+        state.activeLocation = (location as typeof DEFAULT_LOCATION | null | undefined) ?? DEFAULT_LOCATION;
       }),
 
     resetActiveLocation: () =>
