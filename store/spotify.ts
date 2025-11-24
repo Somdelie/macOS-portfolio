@@ -142,9 +142,11 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
         return;
       }
       set({ isLoading: true, error: null });
-      // Allow configuring redirect URI explicitly to avoid INVALID_CLIENT redirect_uri mismatches
+      // Build redirect URI with robust precedence to avoid INVALID_CLIENT redirect mismatches
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
       const redirectUri =
-        process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI || `${window.location.origin}/spotify/callback`;
+        process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI ||
+        (siteUrl ? `${siteUrl.replace(/\/$/, "")}/spotify/callback` : `${window.location.origin}/spotify/callback`);
 
       const params = new URLSearchParams({
         response_type: "code",
@@ -172,8 +174,10 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
         // Default to PKCE (recommended); allow overriding with NEXT_PUBLIC_SPOTIFY_AUTH_FLOW=code to disable PKCE
         const flow = (process.env.NEXT_PUBLIC_SPOTIFY_AUTH_FLOW || "pkce").toLowerCase();
         const verifier = sessionStorage.getItem("spotify:code_verifier") || "";
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
         const redirectUri =
-          process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI || `${window.location.origin}/spotify/callback`;
+          process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI ||
+          (siteUrl ? `${siteUrl.replace(/\/$/, "")}/spotify/callback` : `${window.location.origin}/spotify/callback`);
         const body = new URLSearchParams({
           client_id: clientId,
           grant_type: "authorization_code",
