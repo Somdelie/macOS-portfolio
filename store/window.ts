@@ -30,6 +30,16 @@ const useWindowStore = create<WindowStore>()(
 
     openWindow: (windowKey: string, data: WindowEntry["data"]) =>
       set((state: Draft<WindowStore>) => {
+        // initialize entry if it doesn't exist to avoid runtime errors
+        if (!state.windows[windowKey]) {
+          state.windows[windowKey] = {
+            isOpen: false,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: INITIAL_Z_INDEX,
+            data: null,
+          } as WindowEntry;
+        }
         const win = state.windows[windowKey];
         win.isOpen = true;
         win.isMinimized = false;
@@ -41,6 +51,7 @@ const useWindowStore = create<WindowStore>()(
     closeWindow: (windowKey: string) =>
       set((state: Draft<WindowStore>) => {
         const win = state.windows[windowKey];
+        if (!win) return; // no-op if window entry is missing
         win.isOpen = false;
         win.isMinimized = false;
         win.isMaximized = false;
@@ -51,6 +62,7 @@ const useWindowStore = create<WindowStore>()(
     minimizeWindow: (windowKey: string) =>
       set((state: Draft<WindowStore>) => {
         const win = state.windows[windowKey];
+        if (!win) return;
         // mark minimized and hide the window (isOpen false), reset zIndex
         win.isMinimized = true;
         win.isMaximized = false;
@@ -62,6 +74,7 @@ const useWindowStore = create<WindowStore>()(
     maximizeWindow: (windowKey: string) =>
       set((state: Draft<WindowStore>) => {
         const win = state.windows[windowKey];
+        if (!win) return;
         if (win.isMaximized) {
           // restore
           win.isMaximized = false;
@@ -81,6 +94,7 @@ const useWindowStore = create<WindowStore>()(
     focusWindow: (windowKey: string) =>
       set((state: Draft<WindowStore>) => {
         const win = state.windows[windowKey];
+        if (!win) return;
         // bring to front; also unminimize if it was minimized
         win.zIndex = state.nextZIndex;
         win.isOpen = true;
