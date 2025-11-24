@@ -49,6 +49,12 @@ const dockApps = [
     canOpen: true,
   },
   {
+    id: "music",
+    name: "Music", // was "Photos"
+    icon: "music.png",
+    canOpen: true,
+  },
+  {
     id: "photos",
     name: "Gallery", // was "Photos"
     icon: "photos.png",
@@ -70,7 +76,7 @@ const dockApps = [
     id: "trash",
     name: "Archive", // was "Trash"
     icon: "trash.png",
-    canOpen: false,
+    canOpen: true,
   },
 ];
 
@@ -213,6 +219,7 @@ export {
   socials,
   photosLinks,
   gallery,
+  
 };
 
 const WORK_LOCATION = {
@@ -397,7 +404,7 @@ const ABOUT_LOCATION = {
       kind: "file",
       fileType: "img",
       position: "top-10 left-5",
-      imageUrl: "/images/adrian.jpg",
+      imageUrl: "/images/cautie.jpg",
     },
     {
       id: 2,
@@ -406,7 +413,7 @@ const ABOUT_LOCATION = {
       kind: "file",
       fileType: "img",
       position: "top-28 right-72",
-      imageUrl: "/images/adrian-2.jpg",
+      imageUrl: "/images/cautie1.jpg",
     },
     {
       id: 3,
@@ -415,7 +422,7 @@ const ABOUT_LOCATION = {
       kind: "file",
       fileType: "img",
       position: "top-52 left-80",
-      imageUrl: "/images/adrian-3.jpeg",
+      imageUrl: "/images/cautie2.jpg",
     },
     {
       id: 4,
@@ -425,12 +432,12 @@ const ABOUT_LOCATION = {
       fileType: "txt",
       position: "top-60 left-5",
       subtitle: "Meet the Developer Behind the Code",
-      image: "/images/adrian.jpg",
+      image: "/images/cautie3.jpg",
       description: [
-        "Hey! I’m Adrian 👋, a web developer who enjoys building sleek, interactive websites that actually work well.",
-        "I specialize in JavaScript, React, and Next.js—and I love making things feel smooth, fast, and just a little bit delightful.",
-        "I’m big on clean UI, good UX, and writing code that doesn’t need a search party to debug.",
-        "Outside of dev work, you'll find me tweaking layouts at 2AM, sipping overpriced coffee, or impulse-buying gadgets I absolutely convinced myself I needed 😅",
+        "Hey! I’m Cautious Ndlovu 👋, a developer focused on building clean, modern, and high‑performing web experiences.",
+        "I specialize in JavaScript, React, and Next.js—with a strong eye for UI/UX and performance.",
+        "I enjoy solving real problems with thoughtful design, scalable architecture, and readable code.",
+        "When I’m not coding, I’m exploring new tools, reading docs, or refining ideas for my next build.",
       ],
     },
   ],
@@ -493,14 +500,74 @@ export const locations = {
 const INITIAL_Z_INDEX = 1000;
 
 const WINDOW_CONFIG = {
-  finder: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
-  contact: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
-  resume: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
-  safari: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
-  photos: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
-  terminal: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
+  finder: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Portfolio", author: "Cautious Ndlovu" },
+  },
+  contact: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Contact", author: "Cautious Ndlovu", email: "admin@cautiousndlovu.co.za" },
+  },
+  resume: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Resume", author: "Cautious Ndlovu" },
+  },
+  safari: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Articles", author: "Cautious Ndlovu" },
+  },
+  photos: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Gallery", author: "Cautious Ndlovu" },
+  },
+  terminal: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Skills", author: "Cautious Ndlovu" },
+  },
+  trash: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Archive", author: "Cautious Ndlovu" },
+  },
+  music: {
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: INITIAL_Z_INDEX,
+    data: { title: "Music", author: "Cautious Ndlovu" },
+  },
   txtfile: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
   imgfile: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: INITIAL_Z_INDEX, data: null },
 };
 
 export { INITIAL_Z_INDEX, WINDOW_CONFIG };
+
+// Desktop wallpapers (user can pick from these)
+export const wallpapers: string[] = [
+  "/images/wallpaper.png",
+  "/images/wallpaper1.jpg",
+  "/images/wallpaper2.png",
+  "/images/wallpaper3.jpg",
+  "/images/wallpaper4.jpg",
+  "/images/wallpaper5.jpg",
+];

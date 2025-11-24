@@ -26,7 +26,7 @@ body {
   width: 100dvw;
   overflow: hidden;
   height: 100dvh;
-  background-image: url("/images/wallpaper.png");
+  background-image: var(--wallpaper, url("/images/wallpaper.png"));
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -112,7 +112,8 @@ body {
       @apply size-14 3xl:size-20 cursor-pointer;
 
       img {
-        @apply object-cover object-center;
+        /* Use contain so all dock icons render at a consistent visual size */
+        @apply object-contain object-center;
       }
     }
   }
@@ -135,17 +136,31 @@ body {
 
   #window-header {
     @apply flex items-center justify-between px-4 py-3 rounded-t-lg bg-gray-50 border-b border-gray-200 select-none text-sm text-gray-400;
+    position: sticky;
+    top: 0;
+    z-index: 5; /* keep above scrolling content */
   }
 
-  /* Constrain window content and enable scrolling when content is large */
+  /* Window wrapper content: don't scroll the entire window body.
+     Each inner pane (sidebar/content) should manage its own overflow. */
   .window-body {
-    max-height: 70vh;
-    overflow: auto;
+    height: 100%;
+    min-height: 0; /* allow children with overflow to size properly */
+    overflow: hidden; /* prevent global scroll; use pane-level scrolling */
+    display: flex;
+    flex-direction: column;
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Make the main content container fill remaining space under the header */
+  .window-body > *:not(#window-header) {
+    flex: 1 1 auto;
+    min-height: 0; /* critical for nested overflow-auto areas */
+  }
+
   #safari {
-    @apply w-4xl absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* remove fixed width for responsiveness; WindowWrapper controls size */
+    @apply absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     .search {
       @apply flex items-center gap-3 w-2/3 bg-white border border-gray-300 rounded-lg px-3 py-2;
@@ -189,7 +204,8 @@ body {
   }
 
   #terminal {
-    @apply w-xl absolute top-32 left-1/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* responsive: no fixed width */
+    @apply absolute top-32 left-1/12 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -235,7 +251,7 @@ body {
   }
 
   #contact {
-    @apply max-w-2xl absolute top-60 left-5/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply max-w-2xl absolute top-60 left-5/12 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -263,7 +279,7 @@ body {
   }
 
   #photos {
-    @apply max-w-3xl absolute top-96 left-1/2 -translate-y-1/2 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    @apply max-w-3xl absolute top-96 left-1/2 -translate-y-1/2 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     .sidebar {
       @apply w-3/12 flex-none bg-gray-50 border-r border-gray-200 flex flex-col p-5;
@@ -323,7 +339,8 @@ body {
   }
 
   #resume {
-    @apply w-fit h-fit absolute top-16 left-7/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* responsive: rely on WindowWrapper sizing */
+    @apply absolute top-16 left-7/12 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     #window-header {
       h2 {
@@ -333,7 +350,8 @@ body {
   }
 
   #finder {
-    @apply absolute w-3xl left-40 top-20 shadow-2xl drop-shadow-2xl overflow-hidden rounded-xl;
+    /* responsive: no fixed width */
+    @apply absolute left-40 top-20 bg-white shadow-2xl drop-shadow-2xl overflow-hidden rounded;
 
     .sidebar {
       @apply w-48 bg-gray-50 border-r border-gray-200 flex flex-col p-5 space-y-3;
@@ -376,8 +394,15 @@ body {
     }
   }
 
+  /* Archive window (Trash) default look to match other windows */
+  #trash {
+    /* responsive: no fixed width */
+    @apply absolute left-72 top-28 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
+  }
+
   #txtfile {
-    @apply w-md absolute top-36 right-32 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* responsive: no fixed width */
+    @apply absolute top-36 right-32 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     h2 {
       @apply font-bold text-sm text-center w-full;
@@ -385,7 +410,8 @@ body {
   }
 
   #imgfile {
-    @apply w-xl absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded-xl overflow-hidden;
+    /* responsive: no fixed width */
+    @apply absolute top-40 left-2/12 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
 
     #window-header {
       p {
@@ -400,6 +426,12 @@ body {
         @apply w-full h-fit object-contain object-center;
       }
     }
+  }
+
+  /* Music window */
+  #music {
+    /* responsive: no fixed width */
+    @apply absolute top-44 left-1/5 bg-white shadow-2xl drop-shadow-2xl rounded overflow-hidden;
   }
 
   #home {

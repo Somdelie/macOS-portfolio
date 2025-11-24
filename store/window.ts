@@ -9,6 +9,14 @@ type WindowEntry = {
   isMaximized?: boolean;
   zIndex: number;
   data: unknown | null;
+  // dimensions in pixels when not maximized
+  width?: number;
+  height?: number;
+  // position in pixels (translation) when not maximized
+  x?: number;
+  y?: number;
+  // optional per-window content/icon size preference
+  iconSize?: "sm" | "md" | "lg";
 };
 
 type WindowConfig = Record<string, WindowEntry>;
@@ -21,10 +29,41 @@ type WindowStore = {
   focusWindow: (windowKey: string) => void;
   minimizeWindow: (windowKey: string) => void;
   maximizeWindow: (windowKey: string) => void;
+  resizeWindow: (windowKey: string, width: number, height: number) => void;
+  setIconSize: (windowKey: string, size: NonNullable<WindowEntry["iconSize"]>) => void;
+  setPosition: (windowKey: string, x: number, y: number) => void;
+  hydrate: () => void;
+};
+
+// localStorage persistence (client-only)
+const STORAGE_KEY = "windowPrefs:v1";
+
+type PersistShape = {
+  windows: Record<string, Pick<WindowEntry, "width" | "height" | "iconSize" | "x" | "y">>;
+};
+
+const safeRead = (): PersistShape | null => {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PersistShape;
+  } catch {
+    return null;
+  }
+};
+
+const safeWrite = (data: PersistShape) => {
+  try {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore
+  }
 };
 
 const useWindowStore = create<WindowStore>()(
-  immer((set) => ({
+  immer((set, get) => ({
     windows: WINDOW_CONFIG as WindowConfig,
     nextZIndex: INITIAL_Z_INDEX + 1,
 
@@ -38,9 +77,18 @@ const useWindowStore = create<WindowStore>()(
             isMaximized: false,
             zIndex: INITIAL_Z_INDEX,
             data: null,
+            width: 900,
+            height: 600,
+            iconSize: "md",
           } as WindowEntry;
         }
         const win = state.windows[windowKey];
+        // ensure consistent default size for pre-seeded windows
+        if (win.width == null) win.width = 900;
+        if (win.height == null) win.height = 600;
+        if (win.iconSize == null) win.iconSize = "md";
+        if (win.x == null) win.x = 0;
+        if (win.y == null) win.y = 0;
         win.isOpen = true;
         win.isMinimized = false;
         win.isMaximized = false;
@@ -101,6 +149,105 @@ const useWindowStore = create<WindowStore>()(
         win.isMinimized = false;
         state.nextZIndex++;
       }),
+
+    resizeWindow: (windowKey: string, width: number, height: number) =>
+      set((state: Draft<WindowStore>) => {
+        const win = state.windows[windowKey];
+        if (!win) return;
+        if (win.isMaximized) return; // ignore when maximized
+        // enforce minimum and reasonable maximums
+        const MIN_W = 480;
+        const MIN_H = 320;
+        const vw = typeof window !== "undefined"
+          ? window.innerWidth
+          : (typeof document !== "undefined" ? document.documentElement.clientWidth : 1920);
+        const vh = typeof window !== "undefined"
+          ? window.innerHeight
+          : (typeof document !== "undefined" ? document.documentElement.clientHeight : 1080);
+        const MAX_W = vw || 1920;
+        const MAX_H = vh || 1080;
+        const clampedW = Math.max(MIN_W, Math.min(width, MAX_W));
+        const clampedH = Math.max(MIN_H, Math.min(height, MAX_H));
+        win.width = Math.round(clampedW);
+        win.height = Math.round(clampedH);
+        // persist size preferences
+        try {
+          const current = safeRead() || { windows: {} };
+          current.windows[windowKey] = {
+            ...(current.windows[windowKey] || {}),
+            width: win.width,
+            height: win.height,
+            iconSize: win.iconSize,
+            x: win.x,
+            y: win.y,
+          };
+          safeWrite(current);
+        } catch {
+          // ignore
+        }
+      }),
+
+    setIconSize: (windowKey: string, size: NonNullable<WindowEntry["iconSize"]>) =>
+      set((state: Draft<WindowStore>) => {
+        const win = state.windows[windowKey];
+        if (!win) return;
+        win.iconSize = size;
+        // persist icon size preference
+        try {
+          const current = safeRead() || { windows: {} };
+          current.windows[windowKey] = {
+            ...(current.windows[windowKey] || {}),
+            width: win.width,
+            height: win.height,
+            iconSize: win.iconSize,
+            x: win.x,
+            y: win.y,
+          };
+          safeWrite(current);
+        } catch {
+          // ignore
+        }
+      }),
+
+    setPosition: (windowKey: string, x: number, y: number) =>
+      set((state: Draft<WindowStore>) => {
+        const win = state.windows[windowKey];
+        if (!win) return;
+        if (win.isMaximized) return; // ignore while maximized
+        win.x = Math.round(x);
+        win.y = Math.round(y);
+        try {
+          const current = safeRead() || { windows: {} };
+          current.windows[windowKey] = {
+            ...(current.windows[windowKey] || {}),
+            width: win.width,
+            height: win.height,
+            iconSize: win.iconSize,
+            x: win.x,
+            y: win.y,
+          };
+          safeWrite(current);
+        } catch {
+          // ignore
+        }
+      }),
+
+    // hydrate persisted width/height/iconSize on client
+    hydrate: () => {
+      const persisted = safeRead();
+      if (!persisted) return;
+      set((state: Draft<WindowStore>) => {
+        Object.entries(persisted.windows || {}).forEach(([key, val]) => {
+          const win = state.windows[key];
+          if (!win) return;
+          if (typeof val.width === "number" && val.width > 0) win.width = val.width;
+          if (typeof val.height === "number" && val.height > 0) win.height = val.height;
+          if (val.iconSize) win.iconSize = val.iconSize;
+          if (typeof val.x === "number") win.x = val.x;
+          if (typeof val.y === "number") win.y = val.y;
+        });
+      });
+    },
   }))
 );
 

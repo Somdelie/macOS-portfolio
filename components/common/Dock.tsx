@@ -109,7 +109,7 @@ const Dock = () => {
                 alt={name}
                 width={60}
                 height={20}
-                className={canOpen ? "" : "opacity-60"}
+                className={`${canOpen ? "" : "opacity-60"} ${id === "music" ? "scale-90" : ""}`}
               />
             </button>
           </div>

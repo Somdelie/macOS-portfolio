@@ -7,7 +7,7 @@ const DEFAULT_LOCATION = locations.work;
 // Define the store's state interface
 interface LocationState {
   activeLocation: typeof DEFAULT_LOCATION;
-  setActiveLocation: (location: typeof DEFAULT_LOCATION | null) => void;
+  setActiveLocation: (location: unknown) => void;
   resetActiveLocation: () => void;
 }
 
