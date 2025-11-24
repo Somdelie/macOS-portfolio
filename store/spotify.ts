@@ -36,6 +36,8 @@ type SpotifyState = {
   error: string | null;
   login: () => Promise<void>;
   handleCallback: (code: string) => Promise<boolean>;
+  // Support implicit grant fallback (when provider returns access_token in URL hash)
+  handleImplicit: (accessToken: string, expiresIn?: number, refreshToken?: string | null) => Promise<boolean>;
   refreshIfNeeded: () => Promise<void>;
   fetchMe: () => Promise<void>;
   fetchPlaylists: () => Promise<void>;
@@ -132,8 +134,8 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
     login: async () => {
       // Start login flow; show feedback if misconfigured
       const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
-      // Default to Authorization Code Flow; fallback to PKCE if explicitly requested
-      const flow = (process.env.NEXT_PUBLIC_SPOTIFY_AUTH_FLOW || "code").toLowerCase();
+      // Default to PKCE (recommended); allow overriding with NEXT_PUBLIC_SPOTIFY_AUTH_FLOW=code to disable PKCE
+      const flow = (process.env.NEXT_PUBLIC_SPOTIFY_AUTH_FLOW || "pkce").toLowerCase();
       if (!clientId) {
         // Surface a visible error so the user knows why clicking did nothing
         set({ error: "Spotify is not configured. Set NEXT_PUBLIC_SPOTIFY_CLIENT_ID.", isLoading: false });
@@ -151,7 +153,7 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
         redirect_uri: redirectUri,
       });
 
-      // Prefer Authorization Code Flow when requested; fallback to PKCE otherwise
+      // Use PKCE unless explicitly disabled via flow=code
       if (flow !== "code") {
         const verifier = generateCodeVerifier();
         const challenge = await createCodeChallenge(verifier);
@@ -167,8 +169,8 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
       try {
         set({ isLoading: true, error: null });
         const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID as string;
-        // Default to Authorization Code Flow; fallback to PKCE if explicitly requested
-        const flow = (process.env.NEXT_PUBLIC_SPOTIFY_AUTH_FLOW || "code").toLowerCase();
+        // Default to PKCE (recommended); allow overriding with NEXT_PUBLIC_SPOTIFY_AUTH_FLOW=code to disable PKCE
+        const flow = (process.env.NEXT_PUBLIC_SPOTIFY_AUTH_FLOW || "pkce").toLowerCase();
         const verifier = sessionStorage.getItem("spotify:code_verifier") || "";
         const redirectUri =
           process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI || `${window.location.origin}/spotify/callback`;
@@ -206,6 +208,24 @@ const useSpotifyStore = create<SpotifyState>()((set, get) => {
       } catch (e: unknown) {
         const message = e && typeof e === "object" && "message" in e ? String((e as { message?: unknown }).message) : "Spotify auth failed";
         set({ error: message, isLoading: false });
+        return false;
+      }
+    },
+
+    // Handle implicit grant (access_token returned in URL hash). Not recommended, but keeps deployed
+    // instances working if the auth app is configured that way.
+    handleImplicit: async (accessToken: string, expiresIn?: number, refreshToken?: string | null) => {
+      try {
+        const now = Date.now();
+        const expiresAt = now + ((expiresIn ?? 3600) * 1000);
+        set({ accessToken, refreshToken: refreshToken ?? null, expiresAt, isLoading: false, error: null });
+        saveAuth({ accessToken, refreshToken: refreshToken ?? null, expiresAt });
+        await get().fetchMe();
+        await get().fetchPlaylists();
+        await get().fetchLikedTracks();
+        return true;
+      } catch {
+        set({ isLoading: false, error: "Failed to handle implicit token" });
         return false;
       }
     },
